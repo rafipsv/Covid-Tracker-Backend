@@ -14,7 +14,6 @@ app.use(
 const userRouter = require("./routes/userRoutes");
 app.use("/uploads", express.static("uploads"));
 app.use(userRouter);
-
 app.listen(3000, () => {
   console.log("Server started");
 });
