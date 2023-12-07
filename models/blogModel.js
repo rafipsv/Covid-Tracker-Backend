@@ -76,12 +76,17 @@ class BlogModel {
     dataBase.connect((error) => {
       if (error) console.log(error);
       else {
-        let sql = "DELETE FROM blogs WHERE id='" + id + "'";
-        dataBase.query(sql, (error, result) => {
+        let mainSql = "SELECT * FROM blogs WHERE id='" + id + "'";
+        dataBase.query(mainSql, (error, result) => {
           if (error) console.log(error);
           else {
-            console.log(result);
-            cb(result);
+            let sql = "DELETE FROM blogs WHERE id='" + id + "'";
+            dataBase.query(sql, (error, result2) => {
+              if (error) console.log(error);
+              else {
+                cb(result, result2);
+              }
+            });
           }
         });
       }

@@ -1,4 +1,27 @@
+const fs = require("fs");
+const path = require("path");
 const blogModel = require("../models/blogModel");
+function getAppRootDir() {
+  let currentDir = __dirname;
+  while (!fs.existsSync(path.join(currentDir, "package.json"))) {
+    currentDir = path.join(currentDir, "..");
+  }
+  return currentDir;
+}
+function cutString(url) {
+  // Find the index of the "/uploads" substring
+  const index = url.indexOf("/uploads");
+
+  // Check if the substring is found
+  if (index !== -1) {
+    // Cut the string starting from the index and store it in the variable
+    const cutString = url.slice(index);
+    return cutString;
+  } else {
+    // If the substring is not found, return the original URL
+    return url;
+  }
+}
 exports.addBlog = (req, res, next) => {
   let title = req.body.title;
   let desc = req.body.desc;
@@ -57,20 +80,26 @@ exports.editBlog = (req, res, next) => {
 
 exports.deleteBlog = (req, res, next) => {
   let id = req.query.id;
-  blogModel.deleteBlog(id, (result) => {
-    if (result.affectedRows == 0) {
+  blogModel.deleteBlog(id, (result, result2) => {
+    if (result2.affectedRows == 0) {
       data = {
         status: "Failed",
         messege: "No blog found",
         blogID: id,
       };
+      res.status(200).json(data);
     } else {
-      data = {
-        status: "Success",
-        messege: "Blog deleted Successfully",
-        blogID: id,
-      };
+      console.log(result);
+      let splittedPath = cutString(result[0].image);
+      let rootDir = getAppRootDir();
+      fs.unlink(rootDir + splittedPath, (error) => {
+        data = {
+          status: "Success",
+          messege: "Blog deleted Successfully",
+          blogID: id,
+        };
+        res.status(200).json(data);
+      });
     }
-    res.status(200).json(data);
   });
 };
